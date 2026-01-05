@@ -1,0 +1,24 @@
+# IDEs
+.idea/
+.vscode/
+
+# Built Binaries
+dist/
+cloudflare-speedtest
+cloudflare-speedtest.exe
+
+# Test Configs
+config.local.yml
+config.local.yaml
+config.yml
+config.yaml
+
+# Test Results
+*.txt
+*.json
+*.jsonl
+*.influx
+*.tsv
+
+# OS caches
+.DS_Store

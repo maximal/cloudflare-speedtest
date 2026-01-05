@@ -1,0 +1,21 @@
+version: "2"
+
+linters:
+  # Default: standard
+  #default: standard
+  #default: all
+  #default: fast
+  enable:
+    #- revive
+    - unused
+    #- unparam
+
+formatters:
+  # Enable specific formatter.
+  # Default: [] (uses standard Go formatting)
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+    - golines
