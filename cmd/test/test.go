@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -45,8 +46,6 @@ func run() exit.Status {
 		// Transport: http.RoundTripper{},
 	}
 
-	progressln("Getting connection info...")
-
 	result.Latencies.Unloaded = make([]float64, 0, flags.LatencyCount)
 	result.Latencies.Downloaded = make([]float64, 0)
 	result.Latencies.Uploaded = make([]float64, 0)
@@ -58,48 +57,45 @@ func run() exit.Status {
 	result.Speeds.Download = make([]uint64, 0)
 	result.Speeds.Upload = make([]uint64, 0)
 
-	metrics, response, err := getResponseStats(client, false, 0)
+	progressln("Getting connection info...")
+	meta, err := getConnectionInfo(client)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	result.Latencies.Unloaded = append(result.Latencies.Unloaded, metrics.LatencyMs)
-	result.Tests.Latency++
-	lastLatency := metrics.LatencyMs
+	var lastLatency float64 = -1
 
-	result.Traffic.TotalDownloadedBytes += metrics.ResponseSize
-	result.Traffic.TotalUploadedBytes += metrics.RequestSize
-
-	result.Connection.Asn, _ = strconv.ParseUint(response.Header.Get("Cf-Meta-Asn"), 10, 64)
-	result.Connection.AsnLink = ASN_BASE_URL + response.Header.Get("Cf-Meta-Asn")
-	result.Connection.Ip = response.Header.Get("Cf-Meta-Ip")
-	result.Connection.County = response.Header.Get("Cf-Meta-Country")
-	result.Connection.City = response.Header.Get("Cf-Meta-City")
-	result.Connection.Latitude, _ = strconv.ParseFloat(
-		response.Header.Get("Cf-Meta-Latitude"),
-		64,
-	)
-	result.Connection.Longitude, _ = strconv.ParseFloat(
-		response.Header.Get("Cf-Meta-Longitude"),
-		64,
-	)
-	result.Connection.Timezone = response.Header.Get("Cf-Meta-Timezone")
+	result.Connection.Asn = meta.Asn
+	result.Connection.AsnLink = fmt.Sprintf("%s%d", ASN_BASE_URL, meta.Asn)
+	result.Connection.Provider = meta.Organization
+	result.Connection.Ip = meta.Ip
+	result.Connection.Country = meta.Country
+	result.Connection.Region = meta.Region
+	result.Connection.City = meta.City
+	result.Connection.Latitude, _ = strconv.ParseFloat(meta.Latitude, 64)
+	result.Connection.Longitude, _ = strconv.ParseFloat(meta.Longitude, 64)
 
 	printf("ASN:         %d    %s", result.Connection.Asn, result.Connection.AsnLink)
 	printf("IP:          %s", result.Connection.Ip)
-	printf(
-		"Location:    %s / %s",
-		result.Connection.County,
-		result.Connection.City,
-	)
+	printf("Provider:    %s", result.Connection.Provider)
+	if meta.Region != meta.City {
+		printf("Location:    %s / %s / %s", meta.Country, meta.Region, meta.City)
+	} else {
+		printf("Location:    %s / %s", meta.Country, meta.City)
+	}
 	printf("Coordinates: %f, %f", result.Connection.Latitude, result.Connection.Longitude)
-	printf("Timezone:    %s", result.Connection.Timezone)
+	printf(
+		"Server:      %s / %s / %s",
+		meta.Colocation.Country,
+		meta.Colocation.City,
+		meta.Colocation.Iata,
+	)
 	print("")
 
 	progressln("Running %d latency tests...", flags.LatencyCount)
 
-	for i := range flags.LatencyCount - 1 {
-		progress(" %d ", i+2)
+	for i := range flags.LatencyCount {
+		progress(" %d ", i+1)
 
 		metrics, _, err := getResponseStats(client, false, 0)
 		if err != nil {
@@ -110,10 +106,12 @@ func run() exit.Status {
 		result.Traffic.TotalUploadedBytes += metrics.RequestSize
 
 		result.Latencies.Unloaded = append(result.Latencies.Unloaded, metrics.LatencyMs)
-		result.Jitters.Unloaded = append(
-			result.Jitters.Unloaded,
-			math.Abs(metrics.LatencyMs-lastLatency),
-		)
+		if lastLatency >= 0 {
+			result.Jitters.Unloaded = append(
+				result.Jitters.Unloaded,
+				math.Abs(metrics.LatencyMs-lastLatency),
+			)
+		}
 		result.Tests.Latency++
 		lastLatency = metrics.LatencyMs
 	}
@@ -434,6 +432,7 @@ func getResponseStats(
 	if err != nil {
 		return nil, nil, err
 	}
+	defer func() { _ = response.Body.Close() }()
 
 	// log.Println("request done", time.Now())
 	uploadDone = time.Now()
@@ -441,10 +440,8 @@ func getResponseStats(
 	// Downloading body
 	bodyWritten, err := io.Copy(io.Discard, response.Body)
 	if err != nil {
-		_ = response.Body.Close()
 		return nil, nil, err
 	}
-	_ = response.Body.Close()
 	// log.Println("download done", time.Now())
 
 	// Maybe `now - TTFB` is not the best choice
@@ -460,15 +457,36 @@ func getResponseStats(
 	ttfbDuration := ttfb.Sub(connectDone)
 	latency := ttfbDuration - serverTiming
 	return &ResponseStats{
-		Latency:       latency,
-		LatencyMs:     float64(latency) / float64(time.Millisecond),
-		Upload:        uploadDuration,
-		TTFB:          ttfbDuration,
-		Download:      downloadDuration,
-		RequestSize:   requestSize,
-		ResponseSize:  responseSize,
-		UploadSpeed:   uint64(math.Round(float64(requestSize*8) / uploadDuration.Seconds())),
-		DownloadSpeed: uint64(math.Round(float64(responseSize*8) / downloadDuration.Seconds())),
-		Reused:        reused,
+		Latency:      latency,
+		LatencyMs:    float64(latency) / float64(time.Millisecond),
+		Upload:       uploadDuration,
+		TTFB:         ttfbDuration,
+		Download:     downloadDuration,
+		RequestSize:  requestSize,
+		ResponseSize: responseSize,
+		UploadSpeed:  uint64(math.Round(float64(requestSize*8) / uploadDuration.Seconds())),
+		DownloadSpeed: uint64(
+			math.Round(float64(responseSize*8) / (downloadDuration - serverTiming).Seconds()),
+			// OR?
+			// math.Round(float64(responseSize*8) / downloadDuration.Seconds()),
+		),
+		Reused: reused,
 	}, response, nil
+}
+
+func getConnectionInfo(client *http.Client) (*ConnectionInfo, error) {
+	base := "https://" + SPEED_BASE_URL + "/"
+	request, _ := http.NewRequest("GET", base+"meta", nil)
+	request.Header.Add("Referer", base)
+	response, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = response.Body.Close() }()
+
+	var result ConnectionInfo
+	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+	return &result, nil
 }

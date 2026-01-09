@@ -68,14 +68,35 @@ type Result struct {
 	Connection struct {
 		Asn       uint64  `json:"asn"`
 		AsnLink   string  `json:"asn_link"`
+		Provider  string  `json:"provider"`
 		Ip        string  `json:"ip"`
-		County    string  `json:"country"`
+		Country   string  `json:"country"`
+		Region    string  `json:"region"`
 		City      string  `json:"city"`
 		Latitude  float64 `json:"latitude"`
 		Longitude float64 `json:"longitude"`
-		Timezone  string  `json:"timezone"`
 	} `json:"connection"`
 	Info string `json:"info"`
+}
+
+type ConnectionInfo struct {
+	Ip           string `json:"clientIp"`
+	Asn          uint64 `json:"asn"`
+	Organization string `json:"asOrganization"`
+	Country      string `json:"country"`
+	City         string `json:"city"`
+	Region       string `json:"region"`
+	PostalCode   string `json:"postalCode"`
+	Latitude     string `json:"latitude"`
+	Longitude    string `json:"longitude"`
+	Colocation   struct {
+		Iata      string  `json:"iata"`
+		Latitude  float64 `json:"lat"`
+		Longitude float64 `json:"lon"`
+		Country   string  `json:"cca2"`
+		Region    string  `json:"region"`
+		City      string  `json:"city"`
+	} `json:"colo"`
 }
 
 func (rs ResponseStats) Debug() {

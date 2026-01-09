@@ -35,7 +35,7 @@ func init() {
 
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
 	TestCmd.PersistentFlags().
-		BoolVarP(&flags.Insecure, "insecure", "i", false, "make HTTP requests instead of HTTPS/TLS")
+		BoolVarP(&flags.Insecure, "insecure", "i", false, "make HTTP requests instead of HTTPS/TLS ones")
 
 	TestCmd.PersistentFlags().
 		BoolVarP(&flags.Version, "version", "v", false, "print version information and exit")

@@ -19,7 +19,7 @@ Check run using Golang without building:
 ```shell
 go run . --version
 # Expected result:
-# Cloudflare Speedtest CLI v1.0
+# Cloudflare Speedtest CLI v1.1
 ```
 
 Build the executable file with Go:
@@ -39,12 +39,12 @@ Example output:
 ```plain
 Cloudflare Speedtest CLI    © MaximAL    https://github.com/maximal/cloudflare-speedtest
 
-Getting connection info...
 ASN:         6677    https://radar.cloudflare.com/quality/as6677
 IP:          66.77.88.99
+Provider:    MaximAL ISP
 Location:    CZ / Prague
 Coordinates: 50.088040, 14.420760
-Timezone:    Europe/Prague
+Server:      CZ / Prague / PRG
 
 Download:    536 Mbit/s    67.1 MB/s    63.9 MiB/s
 Upload:      111 Mbit/s    13.9 MB/s    13.2 MiB/s
@@ -102,7 +102,7 @@ Usage:
 Flags:
   -f, --format string   output format: text, json, jsonl, influx, tsv (default "text")
   -h, --help            help for cloudflare-speedtest
-  -i, --insecure        make HTTP requests instead of HTTPS/TLS
+  -i, --insecure        make HTTP requests instead of HTTPS/TLS ones
   -n, --no-progress     do not print progress information to STDERR
   -v, --version         print version information and exit
 ```
