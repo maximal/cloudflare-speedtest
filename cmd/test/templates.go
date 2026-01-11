@@ -13,7 +13,7 @@ const (
 		"* https://github.com/maximal\n" +
 		"* https://t.me/maximal\n" +
 		"* https://maximals.ru\n"
-	VERSION        = "1.1"
+	VERSION        = "1.2"
 	SPEED_BASE_URL = "speed.cloudflare.com"
 	ASN_BASE_URL   = "https://radar.cloudflare.com/quality/as"
 )

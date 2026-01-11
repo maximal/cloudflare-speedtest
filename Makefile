@@ -4,7 +4,7 @@ build:
 	#
 	# Building project for current OS and processor architecture...
 	#
-	go build -ldflags '-s -w' -trimpath
+	go build -ldflags '-s -w' -trimpath -buildvcs
 	#
 	# Done.
 	#
@@ -18,21 +18,27 @@ build_all:
 	#
 	# Building for Apple ARM x64...
 	#
-	GOOS=darwin GOARCH=arm64 go build -ldflags '-s -w' -trimpath
+	GOOS=darwin GOARCH=arm64 go build -ldflags '-s -w' -trimpath -buildvcs
 	tar -czf dist/cloudflare-speedtest.apple-arm64.tar.gz cloudflare-speedtest
 	rm cloudflare-speedtest
 	#
 	# Building for Linux AMD x64...
 	#
-	GOOS=linux GOARCH=amd64 go build -ldflags '-s -w' -trimpath
+	GOOS=linux GOARCH=amd64 go build -ldflags '-s -w' -trimpath -buildvcs
 	tar -czf dist/cloudflare-speedtest.linux-amd64.tar.gz cloudflare-speedtest
 	rm cloudflare-speedtest
 	#
 	# Building for Linux ARM x64 (Raspberry Pi)...
 	#
-	GOOS=linux GOARCH=arm64 go build -ldflags '-s -w' -trimpath
+	GOOS=linux GOARCH=arm64 go build -ldflags '-s -w' -trimpath -buildvcs
 	tar -czf dist/cloudflare-speedtest.linux-arm64.tar.gz cloudflare-speedtest
 	rm cloudflare-speedtest
+	#
+	# Building for Windows x64...
+	#
+	GOOS=windows GOARCH=amd64 go build -ldflags '-s -w' -trimpath -buildvcs
+	zip -q dist/cloudflare-speedtest.windows-x64.zip cloudflare-speedtest.exe
+	rm cloudflare-speedtest.exe
 	#
 	# Done.
 	#

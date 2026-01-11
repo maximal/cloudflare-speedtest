@@ -16,14 +16,13 @@ var TestCmd = &cobra.Command{
 			exit.Exit(exit.StatusInvalidFlag)
 		}
 
-		if flags.Version {
-			print(PROGRAM_TITLE + " v" + VERSION)
-			exit.Exit(exit.StatusOk)
-		}
-
 		if len(args) != 0 {
 			stderrRed("No arguments allowed; got: %s", strings.Join(args, ", "))
 			exit.Exit(exit.StatusInvalidArg)
+		}
+
+		if flags.Version {
+			exit.Exit(showVersion())
 		}
 
 		exit.Exit(run())

@@ -24,7 +24,7 @@ go run . --version
 
 Build the executable file with Go:
 ```shell
-go build -ldflags '-s -w' -trimpath
+go build -ldflags '-s -w' -trimpath -buildvcs
 ```
 
 
