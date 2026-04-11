@@ -3,7 +3,7 @@ module github.com/maximal/cloudflare-speedtest
 go 1.25.5
 
 require (
-	github.com/montanaflynn/stats v0.7.1
+	github.com/montanaflynn/stats v0.9.0
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/spf13/cobra v1.10.2
 )

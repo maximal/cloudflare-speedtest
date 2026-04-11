@@ -7,7 +7,7 @@ type TestStep struct {
 }
 
 var testSteps = []TestStep{
-	// Empty download × 20
+	// 100 kB download × 10
 	{Upload: false, Bytes: 100_000, Count: 10},
 
 	// 100 kB upload × 10
@@ -22,15 +22,18 @@ var testSteps = []TestStep{
 	// 10 MB download × 6
 	{Upload: false, Bytes: 10_000_000, Count: 6},
 
-	// 10 MB upload × 5
-	{Upload: true, Bytes: 10_000_000, Count: 5},
+	// 10 MB upload × 6
+	{Upload: true, Bytes: 10_000_000, Count: 6},
 
 	// 25 MB download × 5
 	{Upload: false, Bytes: 25_000_000, Count: 5},
 
-	// 25 MB upload × 4
-	{Upload: true, Bytes: 25_000_000, Count: 4},
+	// 25 MB upload × 5
+	{Upload: true, Bytes: 25_000_000, Count: 5},
 
 	// 100 MB download × 4
 	{Upload: false, Bytes: 100_000_000, Count: 4},
+
+	// 50 MB upload × 4
+	{Upload: true, Bytes: 50_000_000, Count: 4},
 }

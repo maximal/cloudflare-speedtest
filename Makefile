@@ -43,6 +43,9 @@ build_all:
 	# Done.
 	#
 
+run:
+	go run -buildvcs .
+
 update:
 	#
 	# Updating GO modules...

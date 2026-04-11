@@ -2,16 +2,11 @@ version: "2"
 
 linters:
   # Default: standard
-  #default: standard
-  #default: all
+  default: standard
   #default: fast
-  enable:
-    #- revive
-    - unused
-    #- unparam
+  #default: all
 
 formatters:
-  # Enable specific formatter.
   # Default: [] (uses standard Go formatting)
   enable:
     - gci
@@ -19,3 +14,18 @@ formatters:
     - gofumpt
     - goimports
     - golines
+    - swaggo
+
+  settings:
+    # https://golangci-lint.run/docs/formatters/configuration/#gci
+    gci:
+      # Default: ["standard", "default"]
+      sections:
+        - standard
+        - default
+        - localmodule
+    # https://golangci-lint.run/docs/formatters/configuration/#gofumpt
+    gofumpt:
+      # Choose whether to use the extra rules.
+      # Default: false
+      extra-rules: true
